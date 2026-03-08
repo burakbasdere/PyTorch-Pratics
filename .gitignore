@@ -1,0 +1,32 @@
+# Python cache dosyaları
+__pycache__/
+*.py[cod]
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# IDE ve editörler
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ortam dosyaları
+env/
+venv/
+ENV/
+.env
+
+# OS dosyaları
+.DS_Store
+Thumbs.db
+
+# PyTorch modelleri (opsiyonel)
+*.pt
+*.pth
+
+# Jupyter notebook
+.ipynb_checkpoints/
