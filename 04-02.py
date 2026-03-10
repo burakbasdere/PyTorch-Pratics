@@ -7,7 +7,7 @@ import seaborn as sns
 from torch import nn
 
 # CPU kullanımı
-device = torch.device("cpu")
+device = torch.device("cuda")
 
 df=pd.read_csv("04-\\08-seismic_activity_svm.csv")
 
@@ -111,5 +111,6 @@ plt.title("Accuracy Graph")
 plt.xlabel("Epoch")
 plt.ylabel("Accuracy")
 plt.legend()
+
 
 plt.show()
