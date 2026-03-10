@@ -1,0 +1,83 @@
+import pandas as pd
+import numpy as np
+import torch
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+import seaborn as sns
+from torch import nn
+
+df=pd.read_csv("04-\\08-seismic_activity_svm.csv")
+
+#X= df["underground_wave_energy","vibration_axis_variation"].values
+#y= df["seismic_event_detected"].values
+
+#print(df.columns)
+
+#sns.scatterplot(x=df['underground_wave_energy'],y=df['vibration_axis_variation'],hue=df['seismic_event_detected'])
+#plt.show()
+
+X=df[['underground_wave_energy','vibration_axis_variation']].values
+y=df['seismic_event_detected'].values
+
+X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=42)
+
+X_train=torch.tensor(X_train,dtype=torch.float32)
+X_test=torch.tensor(X_test,dtype=torch.float32)
+y_train=torch.tensor(y_train,dtype=torch.float32).unsqueeze(1)
+y_test=torch.tensor(y_test,dtype=torch.float32).unsqueeze(1)
+
+print("X_train.shape",X_train.shape, 
+      "X_test shape", X_test.shape, 
+      "y_train shape", y_train.shape, 
+      "y_test shape",y_test.shape)
+
+class ClassificanNonLinearModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.layer1=nn.Linear(in_features=2,out_features=10)
+        self.layer2=nn.Linear(in_features=10,out_features=10)
+        self.layer3=nn.Linear(in_features=10,out_features=1)
+        #self.relu=nn.ReLU()
+
+    def forward(self,x):
+        return self.layer3(self.layer2(self.layer1(x)))
+    
+model1=ClassificanNonLinearModel()
+
+loss_fn=nn.BCEWithLogitsLoss()
+
+optimizer=torch.optim.Adam(params=model1.parameters(), lr=0.001)
+    
+def calculate_acc(y_predic,y_test):
+    correct=torch.eq(y_test,y_predic).sum().item()
+    acc=(correct/len(y_predic))*100
+    return acc 
+
+
+torch.manual_seed(42)
+
+epochs=400
+
+for epoch in range(epochs):
+    y_logits=model1(X_train)
+    y_pred=torch.round(torch.sigmoid(y_logits))
+
+    loss=loss_fn(y_logits,y_train)
+    acc=calculate_acc(y_test=y_train,y_predic=y_pred)
+
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+
+    model1.eval()
+
+    with torch.inference_mode():
+        test_logits=model1(X_test)
+        test_pred=torch.round(torch.sigmoid(test_logits))
+        test_loss=loss_fn(test_logits,y_test)
+        test_acc=calculate_acc(y_test=y_test,y_predic=test_pred)
+
+    if epoch %40==0:
+        print(f" epoch:{epoch}, loss:{loss} acc:{acc} test loss {test_loss} test acc {test_acc}")
